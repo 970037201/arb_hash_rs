@@ -2,11 +2,12 @@
 Arbitrary block length hash function, potentially cryptographically secure. Passes BigCrush
 
 `features = ["block"]`
-- xor_blocks (Returns the mod-2 addition of two blocks)
-- inc_block (Increment a block, 0th element least significant)
+- `pad_block` (Returns zero padded block to a multiple of bytes)
+- `xor_blocks` (Returns the mod-2 addition of two blocks)
+- `inc_block` (Increment a block, 0th element least significant)
 
 `features = ["digest"]`
-- arb_digest (Returns the digest of an input string)
+- `arb_digest` (Returns the digest of an input string)
 
 `features = ["hash"]`
-- arb_hash (Returns the hash of an input byte array)
+- `arb_hash` (Returns the hash of an input byte array)

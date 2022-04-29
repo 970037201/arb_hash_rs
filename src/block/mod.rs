@@ -1,3 +1,14 @@
+//Returns zero padded block to a multiple of bytes
+// - block: The block to pad
+// - count: The multiple of bytes to pad to
+pub fn pad_block(block: &[u8], count: usize) -> Vec<u8> {
+    let remainder = block.len() % count;
+    match remainder == 0 {
+        true => Vec::from(block),
+        false => [block, &vec![0u8; count - remainder]].concat(),
+    }
+}
+
 //Returns the mod-2 addition of two blocks
 // - block_a: The first block
 // - block_b: The second block

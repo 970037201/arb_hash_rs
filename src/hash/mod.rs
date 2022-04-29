@@ -1,4 +1,4 @@
-use crate::arb_block::xor_blocks;
+use crate::block::xor_blocks;
 
 //Returns the hash of an input byte array
 // - input: some input block, don't use one less than 3 bytes, larger is better but slower

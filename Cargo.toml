@@ -9,3 +9,8 @@ description = "Arbitrary block length hash function, potentially cryptographical
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+[features]
+default = ["hash", "digest"]
+hash = []
+digest = ["hash"]

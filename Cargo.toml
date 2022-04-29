@@ -1,6 +1,6 @@
 [package]
 name = "arb_hash"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 repository = "https://github.com/970037201/arb_hash_rs"
 license = "GPL-3.0"
@@ -11,6 +11,7 @@ description = "Arbitrary block length hash function, potentially cryptographical
 [dependencies]
 
 [features]
-default = ["hash", "digest"]
-hash = []
-digest = ["hash"]
+default = ["hash", "digest", "block"]
+block = []
+digest = ["hash", "block"]
+hash = ["block"]

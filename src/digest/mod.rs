@@ -3,7 +3,7 @@ use crate::{
     hash::arb_hash,
 };
 
-//Returns the digest of an input string
+//Returns the digest of an input byte array
 // - input: some input byte array, could be the contents of a file, for example
 // - length: don't use under 3 bytes, as the output is not well distributed
 // - rounds: 1 round is sufficient, but 2 rounds *might* be better distributed

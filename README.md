@@ -7,7 +7,7 @@ Arbitrary block length hash function, potentially cryptographically secure. Pass
 - `inc_block` (Increment a block, 0th element least significant)
 
 `features = ["digest"]`
-- `arb_digest` (Returns the digest of an input string)
+- `arb_digest` (Returns the digest of an input byte array)
 
 `features = ["hash"]`
 - `arb_hash` (Returns the hash of an input byte array)

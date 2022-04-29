@@ -1,5 +1,5 @@
 use crate::{
-    block::{inc_block, xor_blocks, pad_block},
+    block::{inc_block, pad_block, xor_blocks},
     hash::arb_hash,
 };
 

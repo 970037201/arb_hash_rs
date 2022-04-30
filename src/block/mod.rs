@@ -2,10 +2,13 @@
 // - block: The block to pad
 // - count: The multiple of bytes to pad to
 pub fn pad_block(block: &[u8], count: usize) -> Vec<u8> {
-    let remainder = block.len() % count;
-    match remainder == 0 {
+    match count == 0 {
         true => Vec::from(block),
-        false => [block, &vec![0u8; count - remainder]].concat(),
+        false => {
+            let remainder = block.len() % count;
+            let extend = (count - remainder) % count;
+            [block, &vec![0u8; extend]].concat()
+        }        
     }
 }
 

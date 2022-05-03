@@ -1,17 +1,17 @@
 [package]
 name = "arb_hash"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 repository = "https://github.com/970037201/arb_hash_rs"
 license = "GPL-3.0"
-description = "Arbitrary block length hash function, potentially cryptographically secure. "
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Arbitrary block length hash function, including some other related and handy functions."
 
 [dependencies]
+rayon = {version = "1.5.2", optional = true}
 
 [features]
-default = ["hash", "digest", "block"]
+default = ["hash", "digest", "block", "parallel"]
 block = []
 digest = ["hash", "block"]
+parallel = ["dep:rayon"]
 hash = ["block"]

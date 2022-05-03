@@ -3,6 +3,7 @@ use crate::block::xor_blocks;
 //Returns the hash of an input byte array
 // - input: some input block, don't use one less than 3 bytes, larger is better but slower
 // - rounds: 1 round is sufficient, but 2 rounds *might* be better distributed
+#[inline(always)]
 pub fn arb_hash(input: &[u8], rounds: u64) -> Vec<u8> {
     const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
     let mut output = Vec::from(input);

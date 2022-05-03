@@ -28,7 +28,7 @@ pub fn arb_digest(input: &[u8], length: usize, rounds: u64) -> Vec<u8> {
 pub fn arb_digest(input: &[u8], length: usize, rounds: u64) -> Vec<u8> {
     use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
     use std::sync::RwLock;
-    
+
     let r_block_arc = RwLock::new(vec![0u8; length]);
     let padded_input = pad_block(input, length);
     let chunks: Vec<&[u8]> = padded_input.chunks_exact(length).collect();

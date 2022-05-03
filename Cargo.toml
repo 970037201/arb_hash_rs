@@ -1,10 +1,16 @@
 [package]
 name = "arb_hash"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 repository = "https://github.com/970037201/arb_hash_rs"
 license = "GPL-3.0"
 description = "Arbitrary block length hash function, including some other related and handy functions."
+
+[profile.release]
+opt-level = 3       # Optimize for speed
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = 'abort'     # Abort on panic
 
 [dependencies]
 num_cpus = {version = "1.13.1", optional = true}

@@ -1,18 +1,25 @@
 use crate::{
-    block::{pad_block, resize_block, xor_blocks},
+    block::{inc_block, resize_block, xor_blocks},
     hash::arb_hash,
 };
 
-#[inline(always)]
-pub fn serial_arb_digest(input: &[u8], length: usize, rounds: u64) -> Vec<u8> {
+#[no_mangle]
+pub fn serial_arb_digest(
+    padded_input: &[u8],
+    offset: usize,
+    length: usize,
+    rounds: u64,
+) -> Vec<u8> {
     let mut result_block = vec![0u8; length];
-    let padded_input = pad_block(input, length);
-    for (ctr, chunk) in padded_input.chunks_exact(length).enumerate() {
-        let chunk_hash = arb_hash(&chunk, rounds);
-        let ctr_block = resize_block(&ctr.to_le_bytes(), length);
-        let combined_hash = xor_blocks(&chunk_hash, &ctr_block);
-        let second_hash = arb_hash(&combined_hash, rounds);
-        result_block = xor_blocks(&second_hash, &result_block);
+    let mut chunk_hash_temp = vec![0u8; length];
+    let mut second_hash_temp = vec![0u8; length];
+    let mut ctr_block = resize_block(&offset.to_le_bytes(), length);
+    for chunk in padded_input.chunks_exact(length) {
+        arb_hash(chunk, &mut chunk_hash_temp, rounds);
+        xor_blocks(&mut chunk_hash_temp, &ctr_block);
+        arb_hash(&chunk_hash_temp, &mut second_hash_temp, rounds);
+        xor_blocks(&mut result_block, &second_hash_temp);
+        inc_block(&mut ctr_block);
     }
     result_block
 }

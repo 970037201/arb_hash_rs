@@ -4,7 +4,7 @@ Arbitrary block length hash function, potentially cryptographically secure. Pass
 `features = ["block"]`
 - `resize_block` (Resizes a block, truncating or padding with zeros as needed)
 - `pad_block` (Returns zero padded block to a multiple of bytes)
-- `xor_blocks` (Returns the mod-2 addition of two blocks)
+- `xor_blocks` (Assigning mod 2 addition on two blocks)
 - `inc_block` (Increment a block, 0th element least significant)
 
 `features = ["digest"]`

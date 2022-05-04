@@ -3,23 +3,24 @@ use crate::{
     hash::arb_hash,
 };
 
-#[no_mangle]
-pub fn serial_arb_digest(
-    padded_input: &[u8],
+// Serial method of computing a digest of some list of blocks
+// basically hashes the input, XORs on the block number,
+// hashes that, then XORs it onto the result (which is initalized to 0)
+#[inline(always)]
+pub fn serial_arb_digest<const LEN: usize, const RND: u64>(
+    blocks: &[[u8; LEN]],
+    output: &mut [u8; LEN],
     offset: usize,
-    length: usize,
-    rounds: u64,
-) -> Vec<u8> {
-    let mut result_block = vec![0u8; length];
-    let mut chunk_hash_temp = vec![0u8; length];
-    let mut second_hash_temp = vec![0u8; length];
-    let mut ctr_block = resize_block(&offset.to_le_bytes(), length);
-    for chunk in padded_input.chunks_exact(length) {
-        arb_hash(chunk, &mut chunk_hash_temp, rounds);
+) {
+    output.iter_mut().for_each(|elem| *elem = 0);
+    let mut chunk_hash_temp = [0u8; LEN];
+    let mut second_hash_temp = [0u8; LEN];
+    let mut ctr_block = resize_block(&offset.to_le_bytes());
+    blocks.iter().for_each(|block| {
+        arb_hash::<LEN, RND>(block, &mut chunk_hash_temp);
         xor_blocks(&mut chunk_hash_temp, &ctr_block);
-        arb_hash(&chunk_hash_temp, &mut second_hash_temp, rounds);
-        xor_blocks(&mut result_block, &second_hash_temp);
+        arb_hash::<LEN, RND>(&chunk_hash_temp, &mut second_hash_temp);
+        xor_blocks(output, &second_hash_temp);
         inc_block(&mut ctr_block);
-    }
-    result_block
+    });
 }

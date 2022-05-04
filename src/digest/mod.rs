@@ -5,21 +5,26 @@
 
 mod serial_digest;
 
-#[cfg(not(feature = "parallel"))]
-use crate::block::pad_block;
+#[cfg(feature = "parallel")]
+mod parallel_digest;
+
+use crate::block::pad_input;
+
 #[cfg(not(feature = "parallel"))]
 use serial_digest::serial_arb_digest;
 
 #[cfg(feature = "parallel")]
-mod parallel_digest;
-
-#[cfg(feature = "parallel")]
 use parallel_digest::parallel_arb_digest;
 
-#[no_mangle]
-pub fn arb_digest(input: &[u8], length: usize, rounds: u64) -> Vec<u8> {
+#[inline(always)]
+pub fn arb_digest<const LEN: usize, const RND: u64>(input: &[u8]) -> [u8; LEN] {
+    let padded = pad_input(input);
+    let mut output = [0u8; LEN];
+
     #[cfg(feature = "parallel")]
-    return parallel_arb_digest(input, length, rounds);
+    parallel_arb_digest::<LEN, RND>(&padded, &mut output);
     #[cfg(not(feature = "parallel"))]
-    return serial_arb_digest(&pad_block(input, length), 0, length, rounds);
+    serial_arb_digest::<LEN, RND>(&padded, &mut output, 0);
+
+    output
 }

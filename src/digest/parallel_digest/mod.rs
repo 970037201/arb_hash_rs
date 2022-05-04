@@ -1,37 +1,30 @@
-use crate::block::{pad_block, xor_blocks};
+use crate::block::xor_blocks;
 
-use std::{
-    sync::{Arc, RwLock},
-    thread::{spawn, JoinHandle},
-};
+use std::thread::spawn;
 
 use super::serial_digest::serial_arb_digest;
 
-#[no_mangle]
-pub fn parallel_arb_digest(input: &[u8], length: usize, rounds: u64) -> Vec<u8> {
-    let result_block = Arc::new(RwLock::new(vec![0u8; length]));
-    let padded_input = pad_block(input, length);
-    let chunks: Vec<&[u8]> = padded_input.chunks_exact(length).collect();
-    let workload_len = chunks.len() / 4; //num_cpus::get();
-    let mut workers: Vec<JoinHandle<()>> = chunks
+#[inline(always)]
+pub fn parallel_arb_digest<const LEN: usize, const RND: u64>(
+    input: &[[u8; LEN]],
+    output: &mut [u8; LEN],
+) {
+    output.iter_mut().for_each(|elem| *elem = 0);
+    let workload_len = input.len() / num_cpus::get();
+    let mut thread_handles: Vec<_> = input
         .chunks(workload_len)
         .enumerate()
         .map(|(i, chunk)| {
+            let section_blocks = chunk.to_owned();
             let offset = workload_len * i;
-            let part_input = chunk.concat();
-            let result_clone = result_block.clone();
             spawn(move || {
-                let part_block = serial_arb_digest(&part_input, offset, length, rounds);
-                match result_clone.write() {
-                    Ok(mut lock) => xor_blocks(&mut lock, &part_block),
-                    _ => panic!(),
-                }
+                let mut output = [0u8; LEN];
+                serial_arb_digest::<LEN, RND>(&section_blocks, &mut output, offset);
+                output
             })
         })
         .collect();
-    while let Some(worker) = workers.pop() {
-        worker.join().unwrap();
+    while let Some(worker) = thread_handles.pop() {
+        xor_blocks(output, &worker.join().unwrap());
     }
-    let result = result_block.read().unwrap();
-    result.clone()
 }

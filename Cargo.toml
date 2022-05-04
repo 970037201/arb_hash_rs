@@ -1,6 +1,6 @@
 [package]
 name = "arb_hash"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 repository = "https://github.com/970037201/arb_hash_rs"
 license = "GPL-3.0"

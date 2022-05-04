@@ -7,7 +7,7 @@ use crate::{
 // basically hashes the input, XORs on the block number,
 // hashes that, then XORs it onto the result (which is initalized to 0)
 #[inline(always)]
-pub fn serial_arb_digest<const LEN: usize, const RND: u64>(
+pub fn serial_arb_digest<const RND: u64, const LEN: usize>(
     blocks: &[[u8; LEN]],
     output: &mut [u8; LEN],
     offset: usize,
@@ -17,9 +17,9 @@ pub fn serial_arb_digest<const LEN: usize, const RND: u64>(
     let mut second_hash_temp = [0u8; LEN];
     let mut ctr_block = resize_block(&offset.to_le_bytes());
     blocks.iter().for_each(|block| {
-        arb_hash::<LEN, RND>(block, &mut chunk_hash_temp);
+        arb_hash::<RND, LEN>(block, &mut chunk_hash_temp);
         xor_blocks(&mut chunk_hash_temp, &ctr_block);
-        arb_hash::<LEN, RND>(&chunk_hash_temp, &mut second_hash_temp);
+        arb_hash::<RND, LEN>(&chunk_hash_temp, &mut second_hash_temp);
         xor_blocks(output, &second_hash_temp);
         inc_block(&mut ctr_block);
     });

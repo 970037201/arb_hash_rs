@@ -3,10 +3,10 @@ use crate::block::xor_blocks;
 //Hashes some input byte array
 // - input: some input block, don't use one less than 3 bytes, larger is better but slower
 // - output: some block to store the output
-// LEN: The length of blocks in bytes
 // RND: The number of rounds (> 0 for a good hash)
+// LEN: The length of blocks in bytes
 #[inline(always)]
-pub fn arb_hash<const LEN: usize, const RND: u64>(input: &[u8; LEN], output: &mut [u8; LEN]) {
+pub fn arb_hash<const RND: u64, const LEN: usize>(input: &[u8; LEN], output: &mut [u8; LEN]) {
     (0..LEN).for_each(|i| output[i] = input[i]);
     let shift_table = create_shift_table(LEN * 2);
     let b_ind_table = index_table::<LEN, 1>();

@@ -4,8 +4,11 @@ use std::thread::spawn;
 
 use super::serial_digest::serial_arb_digest;
 
+//Parallel digest computation, made by splitting the input into chunks
+//for each thread, given by the number of CPUs in your system.
+
 #[inline(always)]
-pub fn parallel_arb_digest<const LEN: usize, const RND: u64>(
+pub fn parallel_arb_digest<const RND: u64, const LEN: usize>(
     input: &[[u8; LEN]],
     output: &mut [u8; LEN],
 ) {
@@ -19,7 +22,7 @@ pub fn parallel_arb_digest<const LEN: usize, const RND: u64>(
             let offset = workload_len * i;
             spawn(move || {
                 let mut output = [0u8; LEN];
-                serial_arb_digest::<LEN, RND>(&section_blocks, &mut output, offset);
+                serial_arb_digest::<RND, LEN>(&section_blocks, &mut output, offset);
                 output
             })
         })

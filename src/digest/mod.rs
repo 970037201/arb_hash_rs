@@ -2,6 +2,8 @@
 // - input: some input byte array, could be the contents of a file, for example
 // - length: don't use under 3 bytes, as the output is not well distributed
 // - rounds: 1 round is sufficient, but 2 rounds *might* be better distributed
+// RND: The number of rounds for each hash during the digest (> 0 for a sane hash)
+// LEN: The length of blocks in bytes (>= 3 for a sane hash)
 
 mod serial_digest;
 
@@ -17,14 +19,14 @@ use serial_digest::serial_arb_digest;
 use parallel_digest::parallel_arb_digest;
 
 #[inline(always)]
-pub fn arb_digest<const LEN: usize, const RND: u64>(input: &[u8]) -> [u8; LEN] {
+pub fn arb_digest<const RND: u64, const LEN: usize>(input: &[u8]) -> [u8; LEN] {
     let padded = pad_input(input);
     let mut output = [0u8; LEN];
 
     #[cfg(feature = "parallel")]
-    parallel_arb_digest::<LEN, RND>(&padded, &mut output);
+    parallel_arb_digest::<RND, LEN>(&padded, &mut output);
     #[cfg(not(feature = "parallel"))]
-    serial_arb_digest::<LEN, RND>(&padded, &mut output, 0);
+    serial_arb_digest::<RND, LEN>(&padded, &mut output, 0);
 
     output
 }

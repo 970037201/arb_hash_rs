@@ -10,24 +10,22 @@ use super::serial_digest::serial_arb_digest;
 #[inline(always)]
 pub fn parallel_arb_digest<const RND: u64, const LEN: usize>(
     input: &[[u8; LEN]],
-    output: &mut [u8; LEN],
-) {
-    output.iter_mut().for_each(|elem| *elem = 0);
-    let workload_len = input.len() / num_cpus::get();
+    threads: usize,
+) -> [u8; LEN] {
+    // SAFETY: All elements are initialized and never read from before initialization
+    let mut output = [0u8; LEN];
+    let workload_len = input.len() / threads;
     let mut thread_handles: Vec<_> = input
         .chunks(workload_len)
         .enumerate()
         .map(|(i, chunk)| {
             let section_blocks = chunk.to_owned();
             let offset = workload_len * i;
-            spawn(move || {
-                let mut output = [0u8; LEN];
-                serial_arb_digest::<RND, LEN>(&section_blocks, &mut output, offset);
-                output
-            })
+            spawn(move || serial_arb_digest::<RND, LEN>(&section_blocks, offset))
         })
         .collect();
     while let Some(worker) = thread_handles.pop() {
-        xor_blocks(output, &worker.join().unwrap());
+        output = xor_blocks(&output, &worker.join().unwrap());
     }
+    output
 }

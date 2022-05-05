@@ -6,27 +6,47 @@
 // LEN: The length of blocks in bytes (>= 3 for a sane hash)
 
 mod serial_digest;
+use self::serial_digest::serial_arb_digest;
+use crate::block::pad_input;
 
 #[cfg(feature = "parallel")]
 mod parallel_digest;
-
-use crate::block::pad_input;
-
-#[cfg(not(feature = "parallel"))]
-use serial_digest::serial_arb_digest;
-
 #[cfg(feature = "parallel")]
 use parallel_digest::parallel_arb_digest;
 
+// Parallel computation of digest of byte array
+// - input: byte array to digest
+// - threads: number of threads to use (crate num_cpus could help with this)
+// RND: rounds to use in the hashing
+// LEN: length of the output block in bytes
+#[cfg(feature = "parallel")]
+#[inline(always)]
+pub fn arg_digest_parallel<const RND: u64, const LEN: usize>(
+    input: &[u8],
+    threads: usize,
+) -> [u8; LEN] {
+    let padded = pad_input(input);
+    parallel_arb_digest::<RND, LEN>(&padded, threads)
+}
+
+// Runtime function for digest computation, running in a single thread
+// - input: byte array to digest
+// RND: rounds to use in the hashing
+// LEN: length of the output block in bytes
 #[inline(always)]
 pub fn arb_digest<const RND: u64, const LEN: usize>(input: &[u8]) -> [u8; LEN] {
     let padded = pad_input(input);
-    let mut output = [0u8; LEN];
+    serial_arb_digest::<RND, LEN>(&padded, 0)
+}
 
-    #[cfg(feature = "parallel")]
-    parallel_arb_digest::<RND, LEN>(&padded, &mut output);
-    #[cfg(not(feature = "parallel"))]
-    serial_arb_digest::<RND, LEN>(&padded, &mut output, 0);
-
-    output
+// Const funtion for digest computation, running during compile time
+// - blocks: array of array of bytes to string together and form digest of
+// RND: rounds to use in the hashing
+// LEN: length of the output block in bytes, and the length of each block in the array "blocks"
+// LEN2: number of blocks in the array "blocks"
+#[inline(always)]
+pub const fn arb_digest_const<const RND: u64, const LEN: usize, const LEN2: usize>(
+    blocks: &[[u8; LEN]; LEN2],
+) -> [u8; LEN] {
+    serial_arb_digest::<RND, LEN>(blocks, 0)
 }

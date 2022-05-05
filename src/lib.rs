@@ -18,8 +18,7 @@ mod tests {
         const LEN: usize = 8;
         const INPUT: [u8; 8] = [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
         const EXPECTED: [u8; 8] = [0xF2, 0x04, 0xF7, 0x45, 0xC2, 0x0D, 0xEA, 0xEA];
-        let mut output = [0u8; 8];
-        arb_hash::<RND, LEN>(&INPUT, &mut output);
+        let output = arb_hash::<RND, LEN>(&INPUT);
         assert_eq!(output, EXPECTED);
     }
 }

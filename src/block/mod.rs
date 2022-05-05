@@ -1,14 +1,43 @@
-//Resizes a block, truncating or padding with zeros as needed
+//Runtime funtion for truncating a block with zeros
 // - block: The block to pad
 // LEN: the length of the new block in bytes
 #[inline(always)]
 pub fn resize_block<const LEN: usize>(block: &[u8]) -> [u8; LEN] {
-    let mut output = [0u8; LEN];
-    (0..block.len().min(LEN)).for_each(|i| output[i] = block[i]);
-    output
+    let mut uninit_output = [0u8; LEN];
+    let min_len = block.len().min(LEN);
+    (0..min_len).for_each(|i| uninit_output[i] = block[i]);
+    (min_len..LEN).for_each(|i| uninit_output[i] = 0);
+    // uninit_output is now initialized
+    uninit_output
 }
 
-//Returns array of blocks, zero padded for the last block
+//Const funtion for truncating a compile-time known sized block with zeros
+// - block: The block to pad
+// LEN: the length of the new block in bytes
+// LEN2: the size of the input block in bytes
+#[inline(always)]
+pub const fn const_resize_block<const LEN: usize, const LEN2: usize>(
+    block: &[u8; LEN2],
+) -> [u8; LEN] {
+    let mut uninit_output = [0u8; LEN];
+    let min_len = match LEN2 < LEN {
+        true => LEN2,
+        false => LEN,
+    };
+    let mut i = 0;
+    while i < min_len {
+        uninit_output[i] = block[i];
+        i += 1;
+    }
+    let mut i = min_len;
+    while i < LEN {
+        uninit_output[i] = 0;
+        i += 1;
+    }
+    uninit_output
+}
+
+//Runtime function for padding bytes to multiples of blocks
 // - input: The input to pad
 // LEN: the multiple of bytes to pad to, must NOT BE ZERO
 
@@ -29,24 +58,39 @@ pub fn pad_input<const LEN: usize>(input: &[u8]) -> Vec<[u8; LEN]> {
     result_vec
 }
 
-//Assigning mod 2 addition on two blocks
-// - block_a: The first block, which is the result
+//Const function for mod-2 addition of two blocks
+// - block_a: The first block
 // - block_b: The second block
 // LEN: the number of bytes in a block
 #[inline(always)]
-pub fn xor_blocks<const LEN: usize>(lhs: &mut [u8; LEN], rhs: &[u8; LEN]) {
-    (0..LEN).for_each(|i| lhs[i] ^= rhs[i])
+pub const fn xor_blocks<const LEN: usize>(lhs: &[u8; LEN], rhs: &[u8; LEN]) -> [u8; LEN] {
+    let mut uninit_output = [0u8; LEN];
+    let mut i = 0;
+    while i < LEN {
+        uninit_output[i] = lhs[i] ^ rhs[i];
+        i += 1;
+    }
+    uninit_output
 }
 
-//Increment a block, 0th element least significant
-// - block: The mutable byte array to increment
+//Const function for Mod-2 addition of two blocks
+// - block: The byte array to increment
 // LEN: the length of a block in bytes
 #[inline(always)]
-pub fn inc_block<const LEN: usize>(block: &mut [u8; LEN]) {
-    for elem in block.iter_mut() {
-        *elem = elem.wrapping_add(1);
-        if *elem != 0 {
-            return;
-        }
+pub const fn inc_block<const LEN: usize>(block: &[u8; LEN]) -> [u8; LEN] {
+    let mut uninit_output = [0u8; LEN];
+    let mut i = 0;
+    while i < LEN {
+        uninit_output[i] = block[i];
+        i += 1;
     }
+    let mut i = 0;
+    while i < LEN {
+        uninit_output[i] = uninit_output[i].wrapping_add(1);
+        if uninit_output[i] != 0 {
+            return uninit_output;
+        }
+        i += 1;
+    }
+    uninit_output
 }

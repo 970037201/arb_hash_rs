@@ -21,7 +21,7 @@ use parallel_digest::parallel_arb_digest;
 // LEN: length of the output block in bytes
 #[cfg(feature = "parallel")]
 #[inline(always)]
-pub fn arg_digest_parallel<const RND: u64, const LEN: usize>(
+pub fn arb_digest_parallel<const RND: u64, const LEN: usize>(
     input: &[u8],
     threads: usize,
 ) -> [u8; LEN] {

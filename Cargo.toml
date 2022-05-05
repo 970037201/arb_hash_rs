@@ -15,8 +15,9 @@ panic = 'abort'     # Abort on panic
 [dependencies]
 
 [features]
-default = ["hash", "digest", "block", "parallel"]
+default = ["block", "digest", "parallel", "hash"]
 block = []
+counter = []
 digest = ["hash", "block"]
 parallel = []
 hash = ["block"]

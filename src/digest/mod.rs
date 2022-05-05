@@ -7,7 +7,7 @@
 
 mod serial_digest;
 use self::serial_digest::serial_arb_digest;
-use crate::block::pad_input;
+use crate::block::{pad_input, AHBlock};
 
 #[cfg(feature = "parallel")]
 mod parallel_digest;
@@ -24,7 +24,7 @@ use parallel_digest::parallel_arb_digest;
 pub fn arb_digest_parallel<const RND: u64, const LEN: usize>(
     input: &[u8],
     threads: usize,
-) -> [u8; LEN] {
+) -> AHBlock<LEN> {
     let padded = pad_input(input);
     parallel_arb_digest::<RND, LEN>(&padded, threads)
 }
@@ -34,7 +34,7 @@ pub fn arb_digest_parallel<const RND: u64, const LEN: usize>(
 // RND: rounds to use in the hashing
 // LEN: length of the output block in bytes
 #[inline(always)]
-pub fn arb_digest<const RND: u64, const LEN: usize>(input: &[u8]) -> [u8; LEN] {
+pub fn arb_digest<const RND: u64, const LEN: usize>(input: &[u8]) -> AHBlock<LEN> {
     let padded = pad_input(input);
     serial_arb_digest::<RND, LEN>(&padded, 0)
 }
@@ -46,7 +46,7 @@ pub fn arb_digest<const RND: u64, const LEN: usize>(input: &[u8]) -> [u8; LEN] {
 // LEN2: number of blocks in the array "blocks"
 #[inline(always)]
 pub const fn arb_digest_const<const RND: u64, const LEN: usize, const LEN2: usize>(
-    blocks: &[[u8; LEN]; LEN2],
-) -> [u8; LEN] {
+    blocks: &[AHBlock<LEN>; LEN2],
+) -> AHBlock<LEN> {
     serial_arb_digest::<RND, LEN>(blocks, 0)
 }

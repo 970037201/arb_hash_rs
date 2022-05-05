@@ -1,11 +1,11 @@
-use crate::block::xor_blocks;
+use crate::block::{xor_blocks, AHBlock};
 
 //Const funtion for hashing some input byte array
 // - input: some input block, larger is better but slower
 // RND: The number of rounds (> 0 for a sane hash)
 // LEN: The length of blocks in bytes (> 2 for a sane hash)
 #[inline(always)]
-pub const fn arb_hash<const RND: u64, const LEN: usize>(input: &[u8; LEN]) -> [u8; LEN] {
+pub const fn arb_hash<const RND: u64, const LEN: usize>(input: &AHBlock<LEN>) -> AHBlock<LEN> {
     const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
     // SAFETY: All elements are initialized and never read from before initialization
     let mut output = [0u8; LEN];

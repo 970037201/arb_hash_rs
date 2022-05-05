@@ -14,18 +14,6 @@ impl<const LEN: usize> AHBlock<LEN> {
         AHBlock { data: [0u8; LEN] }
     }
 
-    /// Construct a new block, initialized from the same length byte array, at compile time if possible
-    #[inline(always)]
-    pub const fn from_similar_array(input: &[u8; LEN]) -> Self {
-        let mut block_out = Self::new();
-        let mut i = 0;
-        while i < LEN {
-            block_out.data[i] = input[i];
-            i += 1;
-        }
-        block_out
-    }
-
     /// Construct a new block, initialized from zeros and a source slice, at compile time if possible
     #[inline(always)]
     pub const fn from_slice(input: &[u8]) -> Self {

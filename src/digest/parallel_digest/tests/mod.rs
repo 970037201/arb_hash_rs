@@ -14,3 +14,11 @@ fn parallel_digest_test() {
     let output = AHBlock::arb_digest_parallel::<RND>(&INPUT, THREADS);
     assert_eq!(output, EXPECTED);
 }
+
+#[test]
+fn empty_digest_test() {
+    const THREADS: usize = 2;
+    const INPUT: [u8; 0] = [];
+    let output = AHBlock::arb_digest_parallel::<RND>(&INPUT, THREADS);
+    assert_eq!(output, EXPECTED);
+}

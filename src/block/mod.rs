@@ -1,95 +1,107 @@
-// Block definition
-pub type AHBlock<const LEN: usize> = [u8; LEN];
-
-//Runtime funtion for truncating a block with zeros
-// - block: The block to pad
-// LEN: the length of the new block in bytes
-#[inline(always)]
-pub fn resize_block<const LEN: usize>(block: &[u8]) -> AHBlock<LEN> {
-    let mut block_out = [0u8; LEN];
-    let min_len = block.len().min(LEN);
-    (0..min_len).for_each(|i| block_out[i] = block[i]);
-    (min_len..LEN).for_each(|i| block_out[i] = 0);
-    block_out
+// Block definition, standard cryptographic chunk of data
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct AHBlock<const LEN: usize> {
+    pub data: [u8; LEN],
 }
 
-//Const funtion for truncating a compile-time known sized block with zeros
-// - block: The block to pad
-// LEN: the length of the new block in bytes
-// LEN2: the size of the input block in bytes
-#[inline(always)]
-pub const fn const_resize_block<const LEN: usize, const LEN2: usize>(
-    block: &AHBlock<LEN2>,
-) -> AHBlock<LEN> {
-    let mut block_out = [0u8; LEN];
-    let min_len = match LEN2 < LEN {
-        true => LEN2,
-        false => LEN,
-    };
-    let mut i = 0;
-    while i < min_len {
-        block_out[i] = block[i];
-        i += 1;
+impl<const LEN: usize> AHBlock<LEN> {
+    /// Construct a new block, initialized with all zeros, at compile time if possible
+    #[inline(always)]
+    pub const fn new() -> Self {
+        AHBlock { data: [0u8; LEN] }
     }
-    let mut i = min_len;
-    while i < LEN {
-        block_out[i] = 0;
-        i += 1;
-    }
-    block_out
-}
 
-//Runtime function for padding bytes to multiples of blocks
-// - input: The input to pad
-// LEN: the multiple of bytes to pad to, must NOT BE ZERO
-
-// WARNING: CHANGED SINCE 0.1.11: (and now 0.1.12)
-// Now will pad compliant to ISO/IEC 7816-4
-#[inline(always)]
-pub fn pad_input<const LEN: usize>(input: &[u8]) -> Vec<AHBlock<LEN>> {
-    let block_cnt = input.len() / LEN + 1;
-    let chunks = input.chunks_exact(LEN);
-    let mut result_vec = Vec::with_capacity(block_cnt);
-    let remainder = chunks.remainder();
-    chunks.for_each(|chunk| result_vec.push(chunk.try_into().unwrap()));
-    let marked_remainder = [remainder, &[0x80]].concat();
-    result_vec.push(resize_block(&marked_remainder));
-    result_vec
-}
-
-//Const function for mod-2 addition of two blocks
-// - block_a: The first block
-// - block_b: The second block
-// LEN: the number of bytes in a block
-#[inline(always)]
-pub const fn xor_blocks<const LEN: usize>(lhs: &AHBlock<LEN>, rhs: &AHBlock<LEN>) -> AHBlock<LEN> {
-    let mut block_out = [0u8; LEN];
-    let mut i = 0;
-    while i < LEN {
-        block_out[i] = lhs[i] ^ rhs[i];
-        i += 1;
-    }
-    block_out
-}
-
-//Const function for Mod-2 addition of two blocks
-// - block: The byte array to increment
-// LEN: the length of a block in bytes
-#[inline(always)]
-pub const fn inc_block<const LEN: usize>(block: &AHBlock<LEN>) -> AHBlock<LEN> {
-    let mut block_out = [0u8; LEN];
-    let mut i = 0;
-    while i < LEN {
-        block_out[i] = block[i];
-        i += 1;
-    }
-    let mut i = 0;
-    while i < LEN {
-        block_out[i] = block_out[i].wrapping_add(1);
-        if block_out[i] != 0 {
-            return block_out;
+    /// Construct a new block, initialized from the same length byte array, at compile time if possible
+    #[inline(always)]
+    pub const fn from_similar_array(input: &[u8; LEN]) -> Self {
+        let mut block_out = Self::new();
+        let mut i = 0;
+        while i < LEN {
+            block_out.data[i] = input[i];
+            i += 1;
         }
-        i += 1;
+        block_out
     }
-    block_out
+
+    /// Construct a new block, initialized from zeros and a source slice, at compile time if possible
+    #[inline(always)]
+    pub const fn from_slice(input: &[u8]) -> Self {
+        let mut block_out = Self::new();
+        let min_len = match input.len() < LEN {
+            true => input.len(),
+            false => LEN,
+        };
+        let mut i = 0;
+        while i < min_len {
+            block_out.data[i] = input[i];
+            i += 1;
+        }
+        block_out
+    }
+
+    /// Construct a new block, initialized from another block of same length, at compile time if possible
+    #[inline(always)]
+    pub const fn from_similar_block(input: &Self) -> Self {
+        Self::from_slice(&input.data)
+    }
+
+    /// Construct a new block, initialized from zeros and another block, at compile time if possible
+    #[inline(always)]
+    pub const fn from_block<const LEN2: usize>(input: &AHBlock<LEN2>) -> Self {
+        Self::from_slice(&input.data)
+    }
+
+    /// XOR block with another block
+    #[inline(always)]
+    pub fn xor_block_assign(&mut self, other: &Self) {
+        *self = self.xor_block(other);
+    }
+
+    /// XOR block with another block, producing an output, at compile time if possible
+    #[inline(always)]
+    pub const fn xor_block(&self, other: &Self) -> Self {
+        let mut output = AHBlock::from_similar_block(self);
+        let mut i = 0;
+        while i < LEN {
+            output.data[i] ^= other.data[i];
+            i += 1;
+        }
+        output
+    }
+
+    /// Increment block, little endian
+    #[inline(always)]
+    pub fn inc_block_assign(&mut self) {
+        *self = self.inc_block();
+    }
+
+    /// Output incremented block, little endian, at compile time if possible
+    #[inline(always)]
+    pub const fn inc_block(&self) -> Self {
+        let mut output = AHBlock::from_similar_block(self);
+        let mut i = 0;
+        while i < LEN {
+            output.data[i] = output.data[i].wrapping_add(1);
+            if output.data[i] != 0 {
+                return output;
+            }
+            i += 1;
+        }
+        output
+    }
+}
+
+/// Padding byte slice to multiples of blocks, compliant with ISO/IEC 7816-4
+#[inline(always)]
+pub fn pad_to_blocks<const LEN: usize>(input: &[u8]) -> Vec<AHBlock<LEN>> {
+    let chunks = input.chunks_exact(LEN);
+    let marked_remainder = [chunks.remainder(), &[0x80]].concat();
+    let padding_slice = marked_remainder.as_slice();
+    chunks
+        .chain([padding_slice])
+        .map(|chunk| {
+            let block_arr: [u8; LEN] = chunk.try_into().unwrap();
+            AHBlock::from_slice(&block_arr)
+        })
+        .collect()
 }

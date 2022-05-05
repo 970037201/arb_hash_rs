@@ -7,6 +7,3 @@ pub mod digest;
 // Same-length hash of byte arrays
 #[cfg(feature = "hash")]
 pub mod hash;
-
-#[cfg(test)]
-mod tests;

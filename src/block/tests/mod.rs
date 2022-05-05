@@ -43,3 +43,20 @@ fn xor_block() {
     const XOR_RESULT: AHBlock<3> = BLOCK_A.xor_block(&BLOCK_B);
     assert_eq!(XOR_RESULT.data, EXPECTED);
 }
+
+#[test]
+fn inc_block_assign_test() {
+    const EXPECTED: [u8; 10] = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let mut original: AHBlock<10> = AHBlock::new();
+    original.inc_block_assign();
+    assert_eq!(original.data, EXPECTED);
+}
+
+#[test]
+fn inc_block_test() {
+    const ORIGIN_ARR: [u8; 2] = [0xFF, 1];
+    const EXPECTED_ARR: [u8; 2] = [0, 2]; 
+    const ORIGIN: AHBlock<2> = AHBlock::from_slice(&ORIGIN_ARR);
+    const INCREMENTED: AHBlock<2> = ORIGIN.inc_block();
+    assert_eq!(INCREMENTED.data, EXPECTED_ARR);
+}

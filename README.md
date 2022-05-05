@@ -3,7 +3,7 @@ Arbitrary block length hash function, potentially cryptographically secure. Pass
 
 `features = ["block"]`
 - `resize_block` (Resizes a block, truncating or padding with zeros as needed)
-- `pad_input` (Returns array of blocks, zero padded for the last block)
+- `pad_input` (Returns array of blocks, padded with leading 0xFF, then zeros)
 - `xor_blocks` (Assigning mod 2 addition on two blocks)
 - `inc_block` (Increment a block, 0th element least significant)
 

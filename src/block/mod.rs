@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 // Block definition, standard cryptographic chunk of data
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AHBlock<const LEN: usize> {

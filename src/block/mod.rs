@@ -84,9 +84,6 @@ pub fn pad_to_blocks<const LEN: usize>(input: &[u8]) -> Vec<AHBlock<LEN>> {
     let padding_slice = marked_remainder.as_slice();
     chunks
         .chain([padding_slice])
-        .map(|chunk| {
-            let block_arr: [u8; LEN] = chunk.try_into().unwrap();
-            AHBlock::from_slice(&block_arr)
-        })
+        .map(AHBlock::from_slice)
         .collect()
 }

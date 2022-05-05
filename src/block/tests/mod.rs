@@ -1,5 +1,7 @@
 use crate::block::AHBlock;
 
+use super::pad_to_blocks;
+
 #[test]
 fn new_test() {
     const NEW_BLOCK: AHBlock<4> = AHBlock::new();
@@ -28,7 +30,7 @@ fn xor_block_assign_test() {
     const ARRAY_B: [u8; 6] = [71, 69, 67, 65, 63, 61];
     const EXPECTED: [u8; 6] = [66, 75, 84, 97, 22, 15];
     const XOR_BLOCK: AHBlock<6> = AHBlock::from_slice(&ARRAY_A);
-    let mut input: AHBlock<6>  = AHBlock::from_slice(&ARRAY_B);
+    let mut input: AHBlock<6> = AHBlock::from_slice(&ARRAY_B);
     input.xor_block_assign(&XOR_BLOCK);
     assert_eq!(input.data, EXPECTED);
 }
@@ -55,8 +57,24 @@ fn inc_block_assign_test() {
 #[test]
 fn inc_block_test() {
     const ORIGIN_ARR: [u8; 2] = [0xFF, 1];
-    const EXPECTED_ARR: [u8; 2] = [0, 2]; 
+    const EXPECTED_ARR: [u8; 2] = [0, 2];
     const ORIGIN: AHBlock<2> = AHBlock::from_slice(&ORIGIN_ARR);
     const INCREMENTED: AHBlock<2> = ORIGIN.inc_block();
     assert_eq!(INCREMENTED.data, EXPECTED_ARR);
+}
+
+#[test]
+fn pad_to_blocks_test() {
+    let input = b"";
+    let input_2 = b"This is a test!";
+    let input_3 = b"This is also a test";
+    let padded = pad_to_blocks::<5>(input);
+    let padded_2 = pad_to_blocks::<5>(input_2);
+    let padded_3 = pad_to_blocks::<5>(input_3);
+    assert_eq!(padded.last().unwrap().data, [0x80, 0, 0, 0, 0]);
+    assert_eq!(padded_2.last().unwrap().data, [0x80, 0, 0, 0, 0]);
+    assert_eq!(
+        padded_3.last().unwrap().data,
+        [b't', b'e', b's', b't', 0x80]
+    );
 }

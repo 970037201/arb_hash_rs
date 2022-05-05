@@ -41,20 +41,17 @@ pub const fn const_resize_block<const LEN: usize, const LEN2: usize>(
 // - input: The input to pad
 // LEN: the multiple of bytes to pad to, must NOT BE ZERO
 
-// WARNING: CHANGED SINCE 0.1.11:
-// As extending input with 0s could result in the same hash within LEN bytes,
-// The padding function now leads with 0xFF on padding.
+// WARNING: CHANGED SINCE 0.1.11: (and now 0.1.12)
+// Now will pad compliant to ISO/IEC 7816-4
 #[inline(always)]
 pub fn pad_input<const LEN: usize>(input: &[u8]) -> Vec<[u8; LEN]> {
-    let block_cnt = (input.len() + LEN - 1) / LEN;
+    let block_cnt = input.len() / LEN + 1;
     let chunks = input.chunks_exact(LEN);
     let mut result_vec = Vec::with_capacity(block_cnt);
     let remainder = chunks.remainder();
     chunks.for_each(|chunk| result_vec.push(chunk.try_into().unwrap()));
-    if !remainder.is_empty() {
-        let marked_remainder = [remainder, &[0xFF]].concat();
-        result_vec.push(resize_block(&marked_remainder));
-    }
+    let marked_remainder = [remainder, &[0x80]].concat();
+    result_vec.push(resize_block(&marked_remainder));
     result_vec
 }
 

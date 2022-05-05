@@ -4,7 +4,7 @@ Arbitrary block length hash function, potentially cryptographically secure. Pass
 `features = ["block"]`
 - `resize_block` (Runtime funtion for truncating a block with zeros)
 - `const_resize_block` (Const funtion for truncating a compile-time known sized block with zeros)
-- `pad_input` (Runtime function for padding bytes to multiples of blocks)
+- `pad_input` (Runtime function for padding bytes to ISO/IEC 7816-4 standard)
 - `xor_blocks` (Const function for mod-2 addition of two blocks)
 - `inc_block` (Const function for Mod-2 addition of two blocks)
 

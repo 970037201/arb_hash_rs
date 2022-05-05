@@ -11,6 +11,10 @@ pub fn resize_block<const LEN: usize>(block: &[u8]) -> [u8; LEN] {
 //Returns array of blocks, zero padded for the last block
 // - input: The input to pad
 // LEN: the multiple of bytes to pad to, must NOT BE ZERO
+
+// WARNING: CHANGED SINCE 0.1.11:
+// As extending input with 0s could result in the same hash within LEN bytes,
+// The padding function now leads with 0xFF on padding.
 #[inline(always)]
 pub fn pad_input<const LEN: usize>(input: &[u8]) -> Vec<[u8; LEN]> {
     let block_cnt = (input.len() + LEN - 1) / LEN;
@@ -18,7 +22,10 @@ pub fn pad_input<const LEN: usize>(input: &[u8]) -> Vec<[u8; LEN]> {
     let mut result_vec = Vec::with_capacity(block_cnt);
     let remainder = chunks.remainder();
     chunks.for_each(|chunk| result_vec.push(chunk.try_into().unwrap()));
-    result_vec.push(resize_block(remainder));
+    if !remainder.is_empty() {
+        let marked_remainder = [remainder, &[0xFF]].concat();
+        result_vec.push(resize_block(&marked_remainder));
+    }
     result_vec
 }
 

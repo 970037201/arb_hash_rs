@@ -21,3 +21,25 @@ fn from_block_test() {
     const NEW_BLOCK: AHBlock<7> = AHBlock::from_block(&BLOCK);
     assert_eq!(NEW_BLOCK, BLOCK);
 }
+
+#[test]
+fn xor_block_assign_test() {
+    const ARRAY_A: [u8; 6] = [5, 14, 23, 32, 41, 50];
+    const ARRAY_B: [u8; 6] = [71, 69, 67, 65, 63, 61];
+    const EXPECTED: [u8; 6] = [66, 75, 84, 97, 22, 15];
+    const XOR_BLOCK: AHBlock<6> = AHBlock::from_slice(&ARRAY_A);
+    let mut input: AHBlock<6>  = AHBlock::from_slice(&ARRAY_B);
+    input.xor_block_assign(&XOR_BLOCK);
+    assert_eq!(input.data, EXPECTED);
+}
+
+#[test]
+fn xor_block() {
+    const ARRAY_A: [u8; 3] = [0x10, 0xA0, 0x7E];
+    const ARRAY_B: [u8; 3] = [0x99, 0x88, 0x77];
+    const EXPECTED: [u8; 3] = [137, 40, 9];
+    const BLOCK_A: AHBlock<3> = AHBlock::from_slice(&ARRAY_A);
+    const BLOCK_B: AHBlock<3> = AHBlock::from_slice(&ARRAY_B);
+    const XOR_RESULT: AHBlock<3> = BLOCK_A.xor_block(&BLOCK_B);
+    assert_eq!(XOR_RESULT.data, EXPECTED);
+}

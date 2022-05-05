@@ -13,7 +13,7 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// Function for returning the hash of some block
     #[inline(always)]
     pub const fn arb_hash<const RND: u64>(&self) -> Self {
-        let mut output = Self::from_similar_block(self);
+        let mut output = Self::from_block(self);
         const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
         let b_ind_table = index_table::<LEN, 1>();
         let c_ind_table = index_table::<LEN, 2>();

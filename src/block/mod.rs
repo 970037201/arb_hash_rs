@@ -30,12 +30,6 @@ impl<const LEN: usize> AHBlock<LEN> {
         block_out
     }
 
-    /// Construct a new block, initialized from another block of same length, at compile time if possible
-    #[inline(always)]
-    pub const fn from_similar_block(input: &Self) -> Self {
-        Self::from_slice(&input.data)
-    }
-
     /// Construct a new block, initialized from zeros and another block, at compile time if possible
     #[inline(always)]
     pub const fn from_block<const LEN2: usize>(input: &AHBlock<LEN2>) -> Self {
@@ -51,7 +45,7 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// XOR block with another block, producing an output, at compile time if possible
     #[inline(always)]
     pub const fn xor_block(&self, other: &Self) -> Self {
-        let mut output = AHBlock::from_similar_block(self);
+        let mut output = AHBlock::from_block(self);
         let mut i = 0;
         while i < LEN {
             output.data[i] ^= other.data[i];
@@ -69,7 +63,7 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// Output incremented block, little endian, at compile time if possible
     #[inline(always)]
     pub const fn inc_block(&self) -> Self {
-        let mut output = AHBlock::from_similar_block(self);
+        let mut output = AHBlock::from_block(self);
         let mut i = 0;
         while i < LEN {
             output.data[i] = output.data[i].wrapping_add(1);

@@ -18,10 +18,10 @@ fn from_slice_test() {
 
 #[test]
 fn from_block_test() {
-    const SLICE: &[u8; 7] = &[0, 6, 1, 5, 2, 4, 3];
-    const BLOCK: AHBlock<7> = AHBlock::from_slice(SLICE);
+    const SLICE: &[u8; 8] = &[0, 6, 1, 5, 2, 4, 3, 99];
+    const BLOCK: AHBlock<8> = AHBlock::from_slice(SLICE);
     const NEW_BLOCK: AHBlock<7> = AHBlock::from_block(&BLOCK);
-    assert_eq!(NEW_BLOCK, BLOCK);
+    assert_eq!(NEW_BLOCK.data, BLOCK.data[0..7]);
 }
 
 #[test]

@@ -39,13 +39,17 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// XOR block with another block
     #[inline(always)]
     pub fn xor_block_assign(&mut self, other: &Self) {
-        *self = self.xor_block(other);
+        let mut i = 0;
+        while i < LEN {
+            self.data[i] ^= other.data[i];
+            i += 1;
+        }
     }
 
     /// XOR block with another block, producing an output, at compile time if possible
     #[inline(always)]
     pub const fn xor_block(&self, other: &Self) -> Self {
-        let mut output = AHBlock::from_block(self);
+        let mut output = Self::from_block(self);
         let mut i = 0;
         while i < LEN {
             output.data[i] ^= other.data[i];
@@ -57,13 +61,20 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// Increment block, little endian
     #[inline(always)]
     pub fn inc_block_assign(&mut self) {
-        *self = self.inc_block();
+        let mut i = 0;
+        while i < LEN {
+            self.data[i] = self.data[i].wrapping_add(1);
+            if self.data[i] != 0 {
+                return;
+            }
+            i += 1;
+        }
     }
 
     /// Output incremented block, little endian, at compile time if possible
     #[inline(always)]
     pub const fn inc_block(&self) -> Self {
-        let mut output = AHBlock::from_block(self);
+        let mut output = Self::from_block(self);
         let mut i = 0;
         while i < LEN {
             output.data[i] = output.data[i].wrapping_add(1);

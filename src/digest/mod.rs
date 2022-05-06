@@ -9,14 +9,12 @@ impl<const LEN: usize> AHBlock<LEN> {
     #[cfg(feature = "parallel")]
     #[inline(always)]
     pub fn arb_digest_parallel<const RND: u64>(input: &[u8], threads: usize) -> Self {
-        let padded_input = pad_to_blocks(input);
-        AHBlock::parallel_arb_block_digest::<RND>(&padded_input, threads)
+        AHBlock::parallel_arb_block_digest::<RND>(&pad_to_blocks(input), threads)
     }
 
     /// Single threaded computation of digest of byte slice
     #[inline(always)]
     pub fn arb_digest<const RND: u64>(input: &[u8]) -> Self {
-        let padded = pad_to_blocks(input);
-        AHBlock::serial_arb_block_digest::<RND>(&padded, 0)
+        AHBlock::serial_arb_block_digest::<RND>(&pad_to_blocks(input), 0)
     }
 }

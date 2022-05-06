@@ -4,12 +4,6 @@ mod tests;
 use crate::block::AHBlock;
 
 impl<const LEN: usize> AHBlock<LEN> {
-    /// Function for hashing some block
-    #[inline(always)]
-    pub fn arb_hash_assign<const RND: u64>(&mut self) {
-        *self = self.arb_hash::<RND>();
-    }
-    
     /// Creates a table of indexes offset into an array, wrapping.
     #[inline(always)]
     const fn index_table(offset: usize) -> [usize; LEN] {
@@ -20,6 +14,32 @@ impl<const LEN: usize> AHBlock<LEN> {
             i += 1;
         }
         table
+    }
+
+    /// Function for hashing some block
+    #[inline(always)]
+    pub fn arb_hash_assign<const RND: u64>(&mut self) {
+        const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
+        let b_ind_table: [usize; LEN] = AHBlock::index_table(1);
+        let c_ind_table: [usize; LEN] = AHBlock::index_table(2);
+        let mut _rnd = 0;
+        while _rnd < RND {
+            let mut b_shift = 0;
+            while b_shift < LEN {
+                let mut elem = 0;
+                while elem < LEN {
+                    let shift = SHIFTS[(b_shift + elem) % 5];
+                    let b_index = b_ind_table[elem];
+                    let c_index = c_ind_table[elem];
+                    self.data[elem] = self.data[elem].wrapping_add(self.data[b_index]);
+                    self.data[c_index] ^= self.data[elem];
+                    self.data[c_index] = self.data[c_index].rotate_left(shift);
+                    elem += 1;
+                }
+                b_shift += 1;
+            }
+            _rnd += 1;
+        }
     }
 
     /// Function for returning the hash of some block

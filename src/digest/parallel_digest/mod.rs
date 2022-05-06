@@ -10,7 +10,7 @@ impl<const LEN: usize> AHBlock<LEN> {
     #[inline(always)]
     pub fn parallel_arb_block_digest<const RND: u64>(input: &[Self], threads: usize) -> Self {
         let mut output = Self::new();
-        let workload_len = (input.len() / threads).max(1);
+        let workload_len = input.len() / threads + 1;
         let mut thread_handles: Vec<JoinHandle<Self>> = input
             .chunks(workload_len)
             .enumerate()

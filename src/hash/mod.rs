@@ -22,14 +22,13 @@ impl<const LEN: usize> AHBlock<LEN> {
         table
     }
 
-    const B_IND_TABLE: [usize; LEN] = AHBlock::index_table(1);
-    const C_IND_TABLE: [usize; LEN] = AHBlock::index_table(2);
-
     /// Function for returning the hash of some block
     #[inline(always)]
     pub const fn arb_hash<const RND: u64>(&self) -> Self {
         let mut output = Self::from_block(self);
         const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
+        let b_ind_table: [usize; LEN] = AHBlock::index_table(1);
+        let c_ind_table: [usize; LEN] = AHBlock::index_table(2);
         let mut _rnd = 0;
         while _rnd < RND {
             let mut b_shift = 0;
@@ -37,8 +36,8 @@ impl<const LEN: usize> AHBlock<LEN> {
                 let mut elem = 0;
                 while elem < LEN {
                     let shift = SHIFTS[(b_shift + elem) % 5];
-                    let b_index = Self::B_IND_TABLE[elem];
-                    let c_index = Self::C_IND_TABLE[elem];
+                    let b_index = b_ind_table[elem];
+                    let c_index = c_ind_table[elem];
                     output.data[elem] = output.data[elem].wrapping_add(output.data[b_index]);
                     output.data[c_index] ^= output.data[elem];
                     output.data[c_index] = output.data[c_index].rotate_left(shift);

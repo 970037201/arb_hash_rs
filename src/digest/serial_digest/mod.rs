@@ -11,8 +11,9 @@ impl<const LEN: usize> AHBlock<LEN> {
         let ctr_bytes = &offset.to_le_bytes();
         let mut ctr_block = Self::from_slice(ctr_bytes);
         let (mut i, block_count) = (0, blocks.len());
+        let mut result;
         while i < block_count {
-            let mut result = blocks[i];
+            result = blocks[i];
             result.arb_hash_assign::<RND>();
             result.xor_block_assign(&ctr_block);
             result.arb_hash_assign::<RND>();

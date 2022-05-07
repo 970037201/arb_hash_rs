@@ -22,23 +22,17 @@ impl<const LEN: usize> AHBlock<LEN> {
         const SHIFTS: [u32; 5] = [1, 2, 3, 5, 7];
         let b_ind_table: [usize; LEN] = AHBlock::index_table(1);
         let c_ind_table: [usize; LEN] = AHBlock::index_table(2);
-        let mut _rnd = 0;
-        while _rnd < RND {
-            let mut b_shift = 0;
-            while b_shift < LEN {
-                let mut elem = 0;
-                while elem < LEN {
+        for _rnd in 0..RND {
+            for b_shift in 0..LEN {
+                for elem in 0..LEN {
                     let shift = SHIFTS[(b_shift + elem) % 5];
                     let b_index = b_ind_table[elem];
                     let c_index = c_ind_table[elem];
                     self.data[elem] = self.data[elem].wrapping_add(self.data[b_index]);
                     self.data[c_index] ^= self.data[elem];
                     self.data[c_index] = self.data[c_index].rotate_left(shift);
-                    elem += 1;
                 }
-                b_shift += 1;
             }
-            _rnd += 1;
         }
     }
 

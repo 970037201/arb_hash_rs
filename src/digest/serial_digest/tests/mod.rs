@@ -2,7 +2,7 @@ use crate::block::AHBlock;
 
 const RND: u64 = 4;
 const LEN: usize = 6;
-const EXPECTED: AHBlock<LEN> = AHBlock::from_slice(&[0x26, 0xBE, 0xAB, 0x55, 0x01, 0x17]);
+const EXPECTED: AHBlock<LEN> = AHBlock::from_slice(&[179, 94, 129, 41, 94, 28]);
 
 #[test]
 fn const_digest_test() {

@@ -1,3 +1,5 @@
+#![feature(once_cell)]
+
 // Helper functions
 #[cfg(feature = "block")]
 pub mod block;

@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+
 #[cfg(test)]
 mod tests;
 
@@ -11,9 +13,9 @@ impl<const LEN: usize> AHBlock<LEN> {
     /// Construct a new block, initialized with all zeros, at compile time if possible
     #[inline(always)]
     pub const fn new() -> Self {
-        AHBlock { data: [0u8; LEN] }
+        Self { data: [0u8; LEN] }
     }
-
+    
     /// Construct a new block, initialized from zeros and a source slice, at compile time if possible
     #[inline(always)]
     pub const fn from_slice(input: &[u8]) -> Self {

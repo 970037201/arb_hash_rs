@@ -1,5 +1,3 @@
-use std::mem::MaybeUninit;
-
 #[cfg(test)]
 mod tests;
 

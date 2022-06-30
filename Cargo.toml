@@ -1,10 +1,10 @@
 [package]
 name = "arb_hash"
-version = "0.1.21"
+version = "0.1.22"
 edition = "2021"
 repository = "https://github.com/970037201/arb_hash_rs"
 license = "GPL-3.0"
-description = "Arbitrary block length hash function, including some other related and handy functions."
+description = "Arbitrary experimental block length hash function"
 
 [profile.release]
 opt-level = 3       # Optimize for speed
@@ -15,8 +15,3 @@ panic = 'abort'     # Abort on panic
 [dependencies]
 
 [features]
-default = ["block", "digest", "parallel", "hash"]
-block = []
-digest = ["hash", "block"]
-parallel = []
-hash = ["block"]
